@@ -1,0 +1,77 @@
+<h1>ビットコイン取引所へようこそ</h1>
+<h2>本取引所について</h2>
+<div class="box25">
+<p>
+ここ(今見ているページ)は，ビットコイン取引所にログインした後に表示されるマイページです．<br>
+あなたは, ステータスに表示されている資金を取引所に預けています．(初期資金は 100 BTC)<br>
+本取引所では，下記の『ビットコインの送金』フォームにて資金の引き出しを行うことができます．
+</p>
+</div>
+
+<h2>お知らせ</h2>
+<table border="1">
+<tr>
+<th>ID</th>
+<th>メッセージ</th>
+</tr>
+<% @notes.each_with_index do |n, i| %>
+    <tr>
+    <td><%= i+1 %></td>
+    <td><%= n[:error] %></td>
+    </tr>
+<% end %>
+</table>
+
+<h2>ステータス</h2>
+<h3 class="balance">現在の資金 : <%= @balance%>  BTC</h3>
+<h3>過去の取引</h3>
+
+<table border="1">
+<tr>
+<th>ID</th>
+<th>送金日時</th>
+<th>送金先アドレス</th>
+<th>送金額(BTC)</th>
+<th>トランザクションID</th>
+<th>承認数</th>
+<th>決済ステータス</th>
+<th>TX作成時のブロック高(デバッグ用)</th>
+<th>支払い後残高</th>
+</tr>
+<% @payments.each_with_index do |p, i| if i != 0 then %>
+    <tr>
+    <td><%= i %></td>
+    <td><%= p[:created_at] %></td>
+    <td style="font-size: 8pt; line-height: 150%;"><%= p[:address] %></>
+    <td><%= p[:amount] %></td>
+    <td style="font-size: 8pt; line-height: 150%;"><%= p[:txid] %></td>
+    <td><%= p[:confirm] %></td>
+    <td class="<%= p[:confirm] >= 6 ? "complete" : p[:height] + 10 > @height ? "incomplete" : "failed" %>">
+	  <%= p[:confirm] >= 6 ? "完了" : p[:height] + 10 > @height ? "未完了" : "失敗" %>
+	</td>
+    <td><%= p[:height] %></td>　
+    <td><%= p[:wallet] %></td>　
+    </tr>
+<% end %>
+<% end %>
+</table>
+
+<h2>ビットコインの送金</h2>
+<p><span class="box26">送金先のアドレス、送金する額を入力してください。</span><br>
+※トランザクション手数料は取引所負担です．
+トランザクションがブロードキャストされた後，直ぐにブロックに追加される十分な手数料を設定しています．<br>
+</p>
+<%= form_for Payment.new,:url => { :controller => :exchanges, :action => :create } do |f| %>
+    <%= f.label :address %>
+    <%= f.text_field :address %><br>
+    <%= f.label :amount %>
+    <%= f.number_field :amount %> BTC<br>
+    <%= f.submit :class=>"btn-flat-border" %>
+<% end %>
+
+
+
+<h2>卍 デバッグ用 卍</h2>
+現在のブロック高: <%= @height %><br>
+mempool:<br>
+<%= @mempool %>
